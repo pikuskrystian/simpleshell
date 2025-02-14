@@ -7,20 +7,20 @@
 #include <signal.h>
 
 /* Function declarations */
-int lsh_cd(char **args);
-int lsh_help(char **args);
-int lsh_exit(char **args);
-int lsh_pwd(char **args);
-int lsh_echo(char **args);
-int lsh_clear(char **args);
+int ss_cd(char **args);
+int ss_help(char **args);
+int ss_exit(char **args);
+int ss_pwd(char **args);
+int ss_echo(char **args);
+int ss_clear(char **args);
 
 char *builtin_str[] = {
     "cd", "help", "exit", "pwd", "echo", "clear"};
 
 int (*builtin_func[])(char **) = {
-    &lsh_cd, &lsh_help, &lsh_exit, &lsh_pwd, &lsh_echo, &lsh_clear};
+    &ss_cd, &ss_help, &ss_exit, &ss_pwd, &ss_echo, &ss_clear};
 
-int lsh_num_builtins()
+int ss_num_builtins()
 {
     return sizeof(builtin_str) / sizeof(char *);
 }
@@ -31,38 +31,38 @@ void handle_sigint(int sig)
     fflush(stdout);
 }
 
-int lsh_cd(char **args)
+int ss_cd(char **args)
 {
     if (args[1] == NULL)
     {
-        fprintf(stderr, "lsh: expected argument to \"cd\"\n");
+        fprintf(stderr, "ss: expected argument to \"cd\"\n");
     }
     else
     {
         if (chdir(args[1]) != 0)
         {
-            perror("lsh");
+            perror("ss");
         }
     }
     return 1;
 }
 
-int lsh_help(char **args)
+int ss_help(char **args)
 {
-    printf("LSH Shell\nBuilt-in commands:\n");
-    for (int i = 0; i < lsh_num_builtins(); i++)
+    printf("SS Shell\nBuilt-in commands:\n");
+    for (int i = 0; i < ss_num_builtins(); i++)
     {
         printf("  %s\n", builtin_str[i]);
     }
     return 1;
 }
 
-int lsh_exit(char **args)
+int ss_exit(char **args)
 {
     return 0;
 }
 
-int lsh_pwd(char **args)
+int ss_pwd(char **args)
 {
     char cwd[1024];
     if (getcwd(cwd, sizeof(cwd)) != NULL)
@@ -71,12 +71,12 @@ int lsh_pwd(char **args)
     }
     else
     {
-        perror("lsh");
+        perror("ss");
     }
     return 1;
 }
 
-int lsh_echo(char **args)
+int ss_echo(char **args)
 {
     for (int i = 1; args[i] != NULL; i++)
     {
@@ -86,24 +86,24 @@ int lsh_echo(char **args)
     return 1;
 }
 
-int lsh_clear(char **args)
+int ss_clear(char **args)
 {
     printf("\033[H\033[J");
     return 1;
 }
 
-int lsh_launch(char **args)
+int ss_launch(char **args)
 {
     pid_t pid = fork();
     if (pid == 0)
     {
         if (execvp(args[0], args) == -1)
-            perror("lsh");
+            perror("ss");
         exit(EXIT_FAILURE);
     }
     else if (pid < 0)
     {
-        perror("lsh");
+        perror("ss");
     }
     else
     {
@@ -116,21 +116,21 @@ int lsh_launch(char **args)
     return 1;
 }
 
-int lsh_execute(char **args)
+int ss_execute(char **args)
 {
     if (args[0] == NULL)
         return 1;
-    for (int i = 0; i < lsh_num_builtins(); i++)
+    for (int i = 0; i < ss_num_builtins(); i++)
     {
         if (strcmp(args[0], builtin_str[i]) == 0)
         {
             return (*builtin_func[i])(args);
         }
     }
-    return lsh_launch(args);
+    return ss_launch(args);
 }
 
-char *lsh_read_line(void)
+char *ss_read_line(void)
 {
     char *line = NULL;
     size_t bufsize = 0;
@@ -138,7 +138,7 @@ char *lsh_read_line(void)
     return line;
 }
 
-char **lsh_split_line(char *line)
+char **ss_split_line(char *line)
 {
     int bufsize = 64, position = 0;
     char **tokens = malloc(bufsize * sizeof(char *));
@@ -154,7 +154,7 @@ char **lsh_split_line(char *line)
     return tokens;
 }
 
-void lsh_loop(void)
+void ss_loop(void)
 {
     signal(SIGINT, handle_sigint);
     char *line;
@@ -163,9 +163,9 @@ void lsh_loop(void)
     do
     {
         printf("> ");
-        line = lsh_read_line();
-        args = lsh_split_line(line);
-        status = lsh_execute(args);
+        line = ss_read_line();
+        args = ss_split_line(line);
+        status = ss_execute(args);
         free(line);
         free(args);
     } while (status);
@@ -173,6 +173,6 @@ void lsh_loop(void)
 
 int main()
 {
-    lsh_loop();
+    ss_loop();
     return EXIT_SUCCESS;
 }
