@@ -48,4 +48,4 @@ Example
 # License
 
 This project is open-source and free to use.
-    Optionally runs it on startup if a systemd service file is included.
+    Optionally runs it on startup if a systemd service file is included
